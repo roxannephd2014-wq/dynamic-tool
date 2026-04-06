@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Tool — Functions Teaching Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple: #3C1361;
+    --purple-mid: #5c2a8a;
+    --purple-light: #ede7f6;
+    --green: #7EBA48;
+    --green-dark: #5a9030;
+    --green-light: #f1f8e9;
+    --white: #ffffff;
+    --grey-200: #ececec;
+    --grey-400: #bdbdbd;
+    --text: #1a1a2e;
+  }
+
+  html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--purple); overflow: hidden; }
+
+  .app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, #1e0640 0%, #3C1361 45%, #1a3a10 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .app::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(126,186,72,0.12) 0%, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(126,186,72,0.08) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+
+  .bot-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green) 0%, #5a9030 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; flex-shrink: 0;
+    animation: pulse-ring 3s ease-in-out infinite;
+    box-shadow: 0 0 0 3px rgba(126,186,72,0.3);
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(126,186,72,0.3); }
+    50% { box-shadow: 0 0 0 7px rgba(126,186,72,0.12); }
+  }
+
+  .header-info { flex: 1; }
+  .header-title { font-family: 'Comfortaa', sans-serif; font-size: 14px; font-weight: 700; color: #fff; }
+  .header-sub { font-size: 11px; color: var(--green); font-weight: 300; margin-top: 1px; }
+
+  .grade-pills { display: flex; gap: 5px; }
+  .grade-pill {
+    padding: 3px 9px; border-radius: 12px; font-size: 10px; font-weight: 600;
+    cursor: pointer; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.08); transition: all 0.2s; user-select: none;
+  }
+  .grade-pill:hover, .grade-pill.active {
+    background: var(--green); border-color: var(--green); color: #fff;
+  }
+
+  .status-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* CONCEPT TABS */
+  .concept-nav {
+    display: flex;
+    gap: 5px;
+    padding: 8px 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 5;
+    background: rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .concept-nav::-webkit-scrollbar { display: none; }
+
+  .concept-tab {
+    padding: 5px 12px; border-radius: 18px; font-size: 11px; font-weight: 500;
+    white-space: nowrap; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06);
+    transition: all 0.2s; user-select: none;
+  }
+  .concept-tab:hover, .concept-tab.active {
+    background: var(--purple-mid); border-color: rgba(126,186,72,0.5); color: #fff;
+    box-shadow: 0 0 0 1px rgba(126,186,72,0.3);
+  }
+
+  /* MESSAGES */
+  .messages {
+    flex: 1; overflow-y: auto; padding: 14px;
+    display: flex; flex-direction: column; gap: 11px;
+    position: relative; z-index: 5;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
+  }
+
+  .message { display: flex; gap: 9px; animation: fadeUp 0.3s ease; }
+  .message.user { flex-direction: row-reverse; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .msg-avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 13px;
+    align-self: flex-end;
+  }
+  .msg-avatar.bot { background: linear-gradient(135deg, var(--green), #5a9030); }
+  .msg-avatar.user-av { background: rgba(255,255,255,0.12); font-size: 12px; font-weight: 600; color: #fff; font-family: 'Comfortaa', sans-serif; }
+
+  .bubble {
+    max-width: 80%; padding: 11px 15px; border-radius: 17px;
+    font-size: 13px; line-height: 1.65; position: relative;
+  }
+  .bubble.bot {
+    background: rgba(255,255,255,0.09); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.12); color: #fff;
+    border-bottom-left-radius: 4px;
+  }
+  .bubble.user { background: var(--green); color: #fff; border-bottom-right-radius: 4px; }
+
+  .bubble strong { font-weight: 600; }
+  .bubble a { color: var(--green); text-decoration: underline; font-size: 12px; }
+
+  .caps-ref {
+    display: inline-block; background: rgba(126,186,72,0.2);
+    border: 1px solid rgba(126,186,72,0.4); color: var(--green);
+    border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600;
+  }
+
+  .resource-card {
+    margin-top: 8px; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+    padding: 8px 12px;
+  }
+  .resource-card .rc-label { font-size: 10px; color: var(--green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .resource-card a { display: block; font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 3px; word-break: break-all; }
+
+  /* TYPING */
+  .typing-indicator { display: none; gap: 9px; animation: fadeUp 0.3s ease; }
+  .typing-indicator.visible { display: flex; }
+  .typing-dots {
+    background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 17px; border-bottom-left-radius: 4px;
+    padding: 13px 16px; display: flex; gap: 5px; align-items: center;
+  }
+  .typing-dots span {
+    width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%;
+    animation: bounce 1.2s ease-in-out infinite;
+  }
+  .typing-dots span:nth-child(2){animation-delay:0.2s}
+  .typing-dots span:nth-child(3){animation-delay:0.4s}
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px);background:var(--green)} }
+
+  /* SUGGESTIONS */
+  .suggestions {
+    padding: 7px 14px; display: flex; gap: 6px; flex-wrap: wrap;
+    flex-shrink: 0; position: relative; z-index: 5;
+  }
+  .sug-btn {
+    padding: 5px 11px; border-radius: 18px; font-size: 11.5px;
+    border: 1px solid rgba(126,186,72,0.35); color: rgba(126,186,72,0.9);
+    background: rgba(126,186,72,0.07); cursor: pointer; transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .sug-btn:hover { background: var(--green); color: #fff; border-color: var(--green); }
+
+  /* INPUT */
+  .input-area {
+    padding: 11px 14px; background: rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; gap: 9px; align-items: flex-end;
+    flex-shrink: 0; position: relative; z-index: 10;
+  }
+  .input-wrap {
+    flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 22px; display: flex; align-items: flex-end; padding: 9px 15px;
+    transition: border-color 0.2s;
+  }
+  .input-wrap:focus-within { border-color: var(--green); background: rgba(255,255,255,0.1); }
+  textarea {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    resize: none; max-height: 90px; line-height: 1.5;
+  }
+  textarea::placeholder { color: rgba(255,255,255,0.3); }
+
+  .send-btn {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--green); border: none;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s; box-shadow: 0 4px 12px rgba(126,186,72,0.3);
+  }
+  .send-btn:hover { background: var(--green-dark); transform: scale(1.05); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .send-btn svg { fill: #fff; }
+
+  .disclaimer { text-align: center; font-size: 10px; color: rgba(255,255,255,0.2); padding: 3px 14px 7px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="bot-avatar">📐</div>
+    <div class="header-info">
+      <div class="header-title">Dynamic Tool — Functions Assistant</div>
+      <div class="header-sub">CAPS-Aligned · Gr 10–12 · FET Mathematics</div>
+    </div>
+    <div class="grade-pills">
+      <div class="grade-pill active" onclick="setGrade(this,'10')">Gr 10</div>
+      <div class="grade-pill" onclick="setGrade(this,'11')">Gr 11</div>
+      <div class="grade-pill" onclick="setGrade(this,'12')">Gr 12</div>
+    </div>
+    <div class="status-dot"></div>
+  </div>
+
+  <!-- CONCEPT NAVIGATION -->
+  <div class="concept-nav" id="conceptNav">
+    <div class="concept-tab active" onclick="setConcept(this,'overview')">📋 Overview</div>
+    <div class="concept-tab" onclick="setConcept(this,'functions')">Functions</div>
+    <div class="concept-tab" onclick="setConcept(this,'straight_lines')">Straight Lines</div>
+    <div class="concept-tab" onclick="setConcept(this,'parabola')">Parabola</div>
+    <div class="concept-tab" onclick="setConcept(this,'hyperbola')">Hyperbola</div>
+    <div class="concept-tab" onclick="setConcept(this,'exponential')">Exponential</div>
+    <div class="concept-tab" onclick="setConcept(this,'trig')">Trig Functions</div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="messages" id="messages">
+    <div class="message">
+      <div class="msg-avatar bot">📐</div>
+      <div class="bubble bot">
+        Welcome to the <strong>Dynamic Tool Functions Assistant</strong>! 👋<br><br>
+        I'm your CAPS-aligned teaching companion for <strong>Functions (Gr 10–12)</strong>. I can help you with:<br><br>
+        📘 <strong>Content knowledge</strong> — understanding each function type<br>
+        🧑‍🏫 <strong>Teaching strategies</strong> — how to explain to learners<br>
+        🔗 <strong>Resources</strong> — videos, GeoGebra, Siyavula activities<br>
+        🧭 <strong>Navigation</strong> — what to do next in the Dynamic Tool<br><br>
+        Select your grade and concept above, or just ask me anything!
+      </div>
+    </div>
+  </div>
+
+  <!-- TYPING -->
+  <div class="typing-indicator" id="typing">
+    <div class="msg-avatar bot">📐</div>
+    <div class="typing-dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <!-- SUGGESTIONS -->
+  <div class="suggestions" id="suggestions">
+    <button class="sug-btn" onclick="sendSug(this)">What is a function?</button>
+    <button class="sug-btn" onclick="sendSug(this)">Explain gradient intercept</button>
+    <button class="sug-btn" onclick="sendSug(this)">Parabola parameters</button>
+    <button class="sug-btn" onclick="sendSug(this)">Where do I start?</button>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="input" placeholder="Ask about functions, teaching strategies, or resources…" rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    </div>
+    <button class="send-btn" id="sendBtn" onclick="send()">
+      <svg width="17" height="17" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+    </button>
+  </div>
+
+  <div class="disclaimer">Dynamic Tool · University of Johannesburg · Verify all content against official CAPS documentation</div>
+</div>
+
+<script>
+// ── CONTENT MAP from UnpackingofIntervention.xlsx ──
+const CONTENT = {
+  functions: {
+    label: "Functions",
+    caps: "CAPS p24",
+    grade: "Gr 10",
+    guiding: ["Relationships between variables", "Table, graphs, words, formulae"],
+    videos: [
+      { title: "Clarification of Function concept", url: "https://www.youtube.com/watch?v=52tpYl2tTqk&t=195s" },
+      { title: "Function concept (2)", url: "https://www.youtube.com/watch?v=aeWeL_4ecBw" }
+    ],
+    websites: [
+      { title: "Relations and Functions — Byjus", url: "https://byjus.com/maths/relations-and-functions/" },
+      { title: "Siyavula Gr 10 Functions", url: "https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-00" }
+    ],
+    activities: [
+      { title: "Siyavula Example Activities", url: "https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-00" },
+      { title: "Simple Authentic Example", url: null, note: "See GoogleDoc with sample activities for facilitating concept of functions" }
+    ],
+    misconceptions: ["Confusing a relation with a function", "Thinking all graphs are functions", "Misreading mapping diagrams"]
+  },
+  straight_lines: {
+    label: "Straight Lines",
+    caps: "CAPS p24",
+    grade: "Gr 10",
+    guiding: ["Table", "Gradient intercept (m and c)", "x and y intercept", "Graphical solution of simultaneous equations", "Systems of two linear equations (CAPS p22)"],
+    videos: [
+      { title: "Linear equations", url: "https://www.youtube.com/watch?v=Ft2_QtXAnh8" },
+      { title: "Basics of linear equations", url: "https://www.youtube.com/watch?v=MXV65i9g1Xg" },
+      { title: "Solving Systems by Graphing", url: "https://www.youtube.com/watch?v=NsoCmMtaRPo" },
+      { title: "Systems of Linear Equations by Graphing", url: "https://www.youtube.com/watch?v=SoVUECpWkKc" }
+    ],
+    websites: [
+      { title: "Siyavula — Linear Functions Gr 10", url: "https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-01" }
+    ],
+    geogebra: [
+      { title: "Straight line (m and c)", url: "https://www.geogebra.org/m/y7UVZHT4#material/qGabgSRT" },
+      { title: "Properties of Straight Line Graph", url: "https://www.mathsisfun.com/data/straight_line_graph.html" },
+      { title: "Simultaneous Equations — Graphical", url: "https://www.geogebra.org/m/FsMeUj4Q" }
+    ],
+    activities: [
+      { title: "Linear functions — Siyavula", url: "https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-01" },
+      { title: "Systems of equations (Khan Academy)", url: "https://www.khanacademy.org/math/cc-eighth-grade-math/cc-8th-systems-topic/cc-8th-systems-graphically/a/systems-of-equations-with-graphing" }
+    ],
+    misconceptions: ["Confusing gradient with y-intercept", "Sign errors when reading negative gradients", "Misinterpreting the intersection point of simultaneous equations"]
+  },
+  parabola: {
+    label: "Parabola",
+    caps: "CAPS p24, p30, p32",
+    grade: "Gr 10–12",
+    guiding: [
+      "Table and graphical representation",
+      "Influence of parameters: ax² + q",
+      "Influence of parameters: ax² + bx + c",
+      "Influence of parameters: a(x−p)² + q (completing the square)",
+      "x and y intercept, vertex",
+      "Determining equation from given points",
+      "Average gradient between two points",
+      "Intuitive understanding of gradient at a point",
+      "Nature of the roots (CAPS p30)"
+    ],
+    videos: [], websites: [], geogebra: [], activities: [],
+    misconceptions: [
+      "Confusing the vertex with the y-intercept",
+      "Not linking discriminant (b²−4ac) to number of roots",
+      "Errors completing the square when a≠1",
+      "Forgetting that a<0 flips the parabola"
+    ]
+  },
+  hyperbola: {
+    label: "Hyperbola",
+    caps: "CAPS p24, p32",
+    grade: "Gr 10–11",
+    guiding: [
+      "Table and graphical representation",
+      "Influence of parameters: a/x + q",
+      "Influence of parameters: a/(x+p) + q",
+      "Asymptotes (horizontal and vertical)",
+      "Axes of symmetry, x and y intercept"
+    ],
+    videos: [], websites: [], geogebra: [], activities: [],
+    misconceptions: [
+      "Assuming the graph touches the asymptotes",
+      "Confusing horizontal and vertical asymptotes",
+      "Sign errors when reading asymptote from a/(x+p)+q"
+    ]
+  },
+  exponential: {
+    label: "Exponential Functions",
+    caps: "CAPS p24, p32",
+    grade: "Gr 10–12",
+    guiding: [
+      "Table and graphical representation",
+      "Influence of parameters: y = ab^x + q",
+      "Horizontal asymptote",
+      "x and y intercept"
+    ],
+    videos: [], websites: [], geogebra: [], activities: [],
+    misconceptions: [
+      "Confusing exponential growth with linear growth",
+      "Thinking b can be negative",
+      "Misreading the horizontal asymptote position when q≠0"
+    ]
+  },
+  trig: {
+    label: "Trigonometric Functions",
+    caps: "CAPS p24, p32, p42",
+    grade: "Gr 10–12",
+    guiding: [
+      "Table and graphical representation",
+      "Influence of parameters on sin, cos, tan",
+      "General solutions of equations (CAPS p42)",
+      "Use graphs to determine general solution to equations"
+    ],
+    videos: [], websites: [], geogebra: [], activities: [],
+    misconceptions: [
+      "Confusing period and amplitude",
+      "Errors applying transformations (horizontal shift vs vertical shift)",
+      "Not restricting domain when solving general solutions"
+    ]
+  }
+};
+
+const SUGGESTIONS = {
+  overview: ["What is a function?", "Explain gradient intercept", "Parabola parameters", "Where do I start?"],
+  functions: ["Relationships between variables", "What makes something a function?", "Show me a teaching strategy", "Link to Siyavula activities"],
+  straight_lines: ["Explain gradient intercept to learners", "Show videos for linear equations", "GeoGebra for straight lines", "Simultaneous equations graphically"],
+  parabola: ["Explain a(x-p)²+q to learners", "Nature of roots misconceptions", "Average gradient between two points", "Completing the square strategy"],
+  hyperbola: ["What is an asymptote?", "Explain a/(x+p)+q", "Common hyperbola misconceptions", "Axes of symmetry for hyperbola"],
+  exponential: ["Explain y=ab^x+q", "Horizontal asymptote teaching tip", "Exponential vs linear growth", "Show parameter influence"],
+  trig: ["General solution steps", "Amplitude and period explained", "Trig parameter transformations", "Use graphs to solve equations"]
+};
+
+const SYSTEM_PROMPT = `You are the Dynamic Tool Assistant — a CAPS-aligned AI teaching assistant for Grade 10–12 Mathematics teachers in South Africa, specifically for the FUNCTIONS topic in the Dynamic Tool intervention hosted on Moodle at the University of Johannesburg.
+
+Your knowledge is grounded in the actual intervention content document (UnpackingofIntervention.xlsx), which maps the following structure:
+Moodle site → Grade → Topic → Concept → Clarification → ChatBot → Repository → Guiding text/Resources
+
+THE INTERVENTION COVERS THESE CONCEPTS:
+
+1. FUNCTIONS (Concept — Gr 10, CAPS p24)
+   - Guiding text: Relationships between variables; Table, graphs, words, formulae
+   - Videos: https://www.youtube.com/watch?v=52tpYl2tTqk&t=195s | https://www.youtube.com/watch?v=aeWeL_4ecBw
+   - External resources: https://byjus.com/maths/relations-and-functions/ | https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-00
+   - Sample activities: Siyavula Gr 10 Functions (https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-00) + Simple authentic example via GoogleDoc
+
+2. STRAIGHT LINES (Concept — Gr 10, CAPS p22, p24)
+   - Guiding text: Table; Gradient intercept (m and c); x and y intercept; Systems of two linear equations; Graphical solution of simultaneous equations
+   - Videos: Linear equations (https://www.youtube.com/watch?v=Ft2_QtXAnh8); Basics (https://www.youtube.com/watch?v=MXV65i9g1Xg); Systems by Graphing (https://www.youtube.com/watch?v=NsoCmMtaRPo | https://www.youtube.com/watch?v=SoVUECpWkKc)
+   - GeoGebra: https://www.geogebra.org/m/y7UVZHT4#material/qGabgSRT | https://www.mathsisfun.com/data/straight_line_graph.html | https://www.geogebra.org/m/FsMeUj4Q
+   - Activities: Siyavula Gr 10 Linear Functions; Khan Academy Systems of equations with graphing
+
+3. PARABOLA (Concept — Gr 10–12, CAPS p24, p30, p32, Framework p68)
+   - Guiding text: Table; Parameters ax²+q, ax²+bx+c, a(x−p)²+q (completing the square); x and y intercept, vertex; Drawing graphs using properties; Determining equation from given points; Average gradient between two points; Intuitive understanding of gradient at a point; Nature of the roots
+
+4. HYPERBOLA (Concept — Gr 10–11, CAPS p24, p32)
+   - Guiding text: Table; Parameters a/x+q, a/(x+p)+q; Asymptotes; Axes of symmetry; x and y intercept
+
+5. EXPONENTIAL FUNCTIONS (Concept — Gr 10–12, CAPS p24, p32)
+   - Guiding text: Table; Parameters y=ab^x+q; Horizontal asymptotes; x and y intercept
+
+6. TRIGONOMETRIC FUNCTIONS (Concept — Gr 10–12, CAPS p24, p32, p42)
+   - Guiding text: Table; Parameters for sin, cos, tan; General solutions of equations (use graphs)
+
+THE MOODLE STRUCTURE teachers navigate:
+- M0: Welcome and Diagnostic
+- Then by Grade (10, 11, 12) → Topic: Functions → Concept (one of the 6 above) → Clarification → ChatBot (that's you!) → Repository (videos, GeoGebra, Siyavula, worksheets)
+- Each clarification has: Guiding text → Videos → External websites → GeoGebra examples → Sample activities/worksheets
+- The intervention uses H5P branching scenarios for interactive content (previously considered Landbot)
+
+YOUR THREE ROLES:
+
+1. CONTENT KNOWLEDGE SUPPORT
+   - Explain the mathematics clearly and correctly
+   - Provide worked examples using CAPS-appropriate language
+   - Reference the correct CAPS page where relevant
+   - Match depth to the grade (Gr 10, 11, or 12)
+
+2. PEDAGOGICAL SUPPORT  
+   - Explain HOW to teach each concept to Gr 10–12 learners
+   - Surface common misconceptions and how to address them
+   - Suggest questioning strategies and lesson approaches
+   - Recommend the right resource type for the teaching goal
+
+3. RESOURCE NAVIGATION
+   - Guide teachers to specific videos, GeoGebra applets, Siyavula links in the repository
+   - Explain what each resource is for
+   - Help teachers decide what to do next in the Dynamic Tool
+   - If a teacher is stuck, guide them step-by-step through the clarification structure
+
+TONE: Warm, professional, encouraging. Use plain language. Keep responses focused (under 180 words unless a worked example is needed). Always affirm teachers' efforts.
+
+IMPORTANT: Only discuss FET Mathematics Functions content and the Dynamic Tool course. Do not make up CAPS page numbers beyond what is listed above. Be honest when something is not yet filled in the intervention document.`;
+
+let currentGrade = '10';
+let currentConcept = 'overview';
+let history = [];
+let loading = false;
+
+function setGrade(el, grade) {
+  document.querySelectorAll('.grade-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  currentGrade = grade;
+}
+
+function setConcept(el, concept) {
+  document.querySelectorAll('.concept-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentConcept = concept;
+  updateSuggestions();
+}
+
+function updateSuggestions() {
+  const container = document.getElementById('suggestions');
+  const sugs = SUGGESTIONS[currentConcept] || SUGGESTIONS.overview;
+  container.innerHTML = sugs.map(s =>
+    `<button class="sug-btn" onclick="sendSug(this)">${s}</button>`
+  ).join('');
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+}
+
+function sendSug(btn) {
+  document.getElementById('input').value = btn.textContent;
+  send();
+}
+
+function addMsg(role, html) {
+  const msgs = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = `message ${role === 'user' ? 'user' : ''}`;
+  const av = document.createElement('div');
+  av.className = `msg-avatar ${role === 'user' ? 'user-av' : 'bot'}`;
+  av.textContent = role === 'user' ? 'T' : '📐';
+  const b = document.createElement('div');
+  b.className = `bubble ${role === 'user' ? 'user' : 'bot'}`;
+  b.innerHTML = html;
+  wrap.appendChild(av);
+  wrap.appendChild(b);
+  msgs.appendChild(wrap);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function formatText(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/`(.*?)`/g, '<code style="background:rgba(126,186,72,0.15);border-radius:3px;padding:1px 5px;font-size:12px;color:#7EBA48">$1</code>')
+    .replace(/\[CAPS:(.*?)\]/g, '<span class="caps-ref">CAPS: $1</span>')
+    .replace(/\n/g, '<br>');
+}
+
+function buildContext() {
+  const concept = currentConcept !== 'overview' ? CONTENT[currentConcept] : null;
+  let ctx = `[Grade: ${currentGrade} | Concept: ${concept ? concept.label : 'Overview — all concepts'}]`;
+  if (concept) {
+    ctx += `\n[CAPS Reference: ${concept.caps}]`;
+    ctx += `\n[Key guiding text for this concept: ${concept.guiding.join('; ')}]`;
+    if (concept.misconceptions.length) ctx += `\n[Common misconceptions: ${concept.misconceptions.join('; ')}]`;
+  }
+  return ctx;
+}
+
+async function send() {
+  const inp = document.getElementById('input');
+  const text = inp.value.trim();
+  if (!text || loading) return;
+
+  inp.value = '';
+  inp.style.height = 'auto';
+  loading = true;
+  document.getElementById('sendBtn').disabled = true;
+
+  addMsg('user', formatText(text));
+
+  const contextualMsg = buildContext() + '\n\n' + text;
+  history.push({ role: 'user', content: contextualMsg });
+
+  const typing = document.getElementById('typing');
+  typing.classList.add('visible');
+  document.getElementById('messages').scrollTop = 99999;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json',
+          'x-api-key': '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',
+          'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: history
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'I had trouble responding. Please try again.';
+    history.push({ role: 'assistant', content: reply });
+
+    typing.classList.remove('visible');
+    addMsg('bot', formatText(reply));
+
+  } catch (err) {
+    typing.classList.remove('visible');
+    addMsg('bot', 'Connection error — please check your internet and try again.');
+  }
+
+  loading = false;
+  document.getElementById('sendBtn').disabled = false;
+  document.getElementById('input').focus();
+}
+</script>
+</body>
+</html>
