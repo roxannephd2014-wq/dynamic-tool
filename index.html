@@ -590,11 +590,9 @@ async function send() {
   document.getElementById('messages').scrollTop = 99999;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://dynamic-tool-proxy.roxannephd2014.workers.dev/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json',
-          'x-api-key': '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',
-          'anthropic-version': '2023-06-01' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 1000,
