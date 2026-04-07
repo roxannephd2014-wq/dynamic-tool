@@ -4,226 +4,284 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dynamic Tool — Functions Teaching Assistant</title>
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --purple: #3C1361;
-    --purple-mid: #5c2a8a;
-    --purple-light: #ede7f6;
-    --green: #7EBA48;
-    --green-dark: #5a9030;
-    --green-light: #f1f8e9;
-    --white: #ffffff;
-    --grey-200: #ececec;
-    --grey-400: #bdbdbd;
-    --text: #1a1a2e;
+    --cream: #FAF7F2;
+    --cream-dark: #F0EBE1;
+    --cream-border: #E5DDD0;
+    --slate: #2C3E50;
+    --slate-mid: #3D5166;
+    --slate-light: #5D7A94;
+    --amber: #E8A020;
+    --amber-light: #FDF3E0;
+    --amber-dark: #C4851A;
+    --teal: #2A8C7A;
+    --teal-light: #E8F5F3;
+    --teal-dark: #1F6B5C;
+    --white: #FFFFFF;
+    --text: #1E2B36;
+    --text-mid: #4A5568;
+    --text-light: #8899AA;
+    --shadow: rgba(44,62,80,0.08);
+    --shadow-md: rgba(44,62,80,0.14);
   }
 
-  html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--purple); overflow: hidden; }
+  html, body {
+    height: 100%;
+    font-family: 'Nunito', sans-serif;
+    background: var(--cream);
+    overflow: hidden;
+  }
 
   .app {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(160deg, #1e0640 0%, #3C1361 45%, #1a3a10 100%);
+    background: var(--cream);
     position: relative;
     overflow: hidden;
   }
 
+  /* Subtle background texture */
   .app::before {
     content: '';
     position: absolute;
     inset: 0;
     background-image:
-      radial-gradient(circle at 15% 20%, rgba(126,186,72,0.12) 0%, transparent 40%),
-      radial-gradient(circle at 85% 80%, rgba(126,186,72,0.08) 0%, transparent 40%);
+      radial-gradient(circle at 90% 10%, rgba(232,160,32,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 10% 90%, rgba(42,140,122,0.06) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
   }
 
-  /* HEADER */
+  /* ── HEADER ── */
   .header {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
-    background: rgba(255,255,255,0.06);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    backdrop-filter: blur(10px);
+    padding: 13px 18px;
+    background: var(--white);
+    border-bottom: 2px solid var(--cream-border);
     position: relative;
     z-index: 10;
     flex-shrink: 0;
+    box-shadow: 0 2px 12px var(--shadow);
   }
 
   .bot-avatar {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--green) 0%, #5a9030 100%);
+    width: 42px; height: 42px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 100%);
     display: flex; align-items: center; justify-content: center;
-    font-size: 19px; flex-shrink: 0;
-    animation: pulse-ring 3s ease-in-out infinite;
-    box-shadow: 0 0 0 3px rgba(126,186,72,0.3);
-  }
-
-  @keyframes pulse-ring {
-    0%, 100% { box-shadow: 0 0 0 3px rgba(126,186,72,0.3); }
-    50% { box-shadow: 0 0 0 7px rgba(126,186,72,0.12); }
+    font-size: 20px; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(42,140,122,0.3);
   }
 
   .header-info { flex: 1; }
-  .header-title { font-family: 'Comfortaa', sans-serif; font-size: 14px; font-weight: 700; color: #fff; }
-  .header-sub { font-size: 11px; color: var(--green); font-weight: 300; margin-top: 1px; }
+
+  .header-title {
+    font-family: 'Lora', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--slate);
+    line-height: 1.2;
+  }
+
+  .header-sub {
+    font-size: 11px;
+    color: var(--teal);
+    font-weight: 600;
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
 
   .grade-pills { display: flex; gap: 5px; }
-  .grade-pill {
-    padding: 3px 9px; border-radius: 12px; font-size: 10px; font-weight: 600;
-    cursor: pointer; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.7);
-    background: rgba(255,255,255,0.08); transition: all 0.2s; user-select: none;
-  }
-  .grade-pill:hover, .grade-pill.active {
-    background: var(--green); border-color: var(--green); color: #fff;
-  }
 
-  .status-dot { width: 7px; height: 7px; background: var(--green); border-radius: 50%; animation: blink 2s ease-in-out infinite; }
+  .grade-pill {
+    padding: 4px 11px; border-radius: 8px; font-size: 11px; font-weight: 700;
+    cursor: pointer; border: 1.5px solid var(--cream-border);
+    color: var(--text-mid); background: var(--cream);
+    transition: all 0.2s; user-select: none; font-family: 'Nunito', sans-serif;
+  }
+  .grade-pill:hover { border-color: var(--amber); color: var(--amber-dark); background: var(--amber-light); }
+  .grade-pill.active { background: var(--amber); border-color: var(--amber); color: var(--white); box-shadow: 0 2px 8px rgba(232,160,32,0.3); }
+
+  .status-wrap { display: flex; align-items: center; gap: 5px; }
+  .status-dot { width: 7px; height: 7px; background: var(--teal); border-radius: 50%; animation: blink 2.5s ease-in-out infinite; }
+  .status-text { font-size: 10px; color: var(--teal); font-weight: 600; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* CONCEPT TABS */
+  /* ── CONCEPT TABS ── */
   .concept-nav {
     display: flex;
-    gap: 5px;
-    padding: 8px 14px;
+    gap: 4px;
+    padding: 10px 16px;
     overflow-x: auto;
     scrollbar-width: none;
     flex-shrink: 0;
+    background: var(--white);
+    border-bottom: 1px solid var(--cream-border);
     position: relative;
     z-index: 5;
-    background: rgba(0,0,0,0.1);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
   }
   .concept-nav::-webkit-scrollbar { display: none; }
 
   .concept-tab {
-    padding: 5px 12px; border-radius: 18px; font-size: 11px; font-weight: 500;
+    padding: 6px 13px; border-radius: 8px; font-size: 11.5px; font-weight: 600;
     white-space: nowrap; cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.15);
-    color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06);
-    transition: all 0.2s; user-select: none;
+    border: 1.5px solid var(--cream-border);
+    color: var(--text-mid); background: var(--cream);
+    transition: all 0.2s; user-select: none; font-family: 'Nunito', sans-serif;
   }
-  .concept-tab:hover, .concept-tab.active {
-    background: var(--purple-mid); border-color: rgba(126,186,72,0.5); color: #fff;
-    box-shadow: 0 0 0 1px rgba(126,186,72,0.3);
-  }
+  .concept-tab:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-light); }
+  .concept-tab.active { background: var(--teal); border-color: var(--teal); color: var(--white); box-shadow: 0 2px 8px rgba(42,140,122,0.25); }
 
-  /* MESSAGES */
+  /* ── MESSAGES ── */
   .messages {
-    flex: 1; overflow-y: auto; padding: 14px;
-    display: flex; flex-direction: column; gap: 11px;
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 13px;
     position: relative; z-index: 5;
-    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.1) transparent;
+    scrollbar-width: thin; scrollbar-color: var(--cream-border) transparent;
   }
 
-  .message { display: flex; gap: 9px; animation: fadeUp 0.3s ease; }
+  .message { display: flex; gap: 10px; animation: fadeUp 0.3s ease; }
   .message.user { flex-direction: row-reverse; }
 
   @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
   .msg-avatar {
-    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 13px;
+    width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
     align-self: flex-end;
   }
-  .msg-avatar.bot { background: linear-gradient(135deg, var(--green), #5a9030); }
-  .msg-avatar.user-av { background: rgba(255,255,255,0.12); font-size: 12px; font-weight: 600; color: #fff; font-family: 'Comfortaa', sans-serif; }
+  .msg-avatar.bot { background: linear-gradient(135deg, var(--teal), var(--teal-dark)); box-shadow: 0 2px 8px rgba(42,140,122,0.2); }
+  .msg-avatar.user-av { background: var(--slate); font-size: 12px; font-weight: 800; color: var(--white); font-family: 'Lora', serif; }
 
   .bubble {
-    max-width: 80%; padding: 11px 15px; border-radius: 17px;
-    font-size: 13px; line-height: 1.65; position: relative;
+    max-width: 78%; padding: 12px 16px; border-radius: 16px;
+    font-size: 13.5px; line-height: 1.65; position: relative;
+    font-family: 'Nunito', sans-serif;
   }
-  .bubble.bot {
-    background: rgba(255,255,255,0.09); backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.12); color: #fff;
-    border-bottom-left-radius: 4px;
-  }
-  .bubble.user { background: var(--green); color: #fff; border-bottom-right-radius: 4px; }
 
-  .bubble strong { font-weight: 600; }
-  .bubble a { color: var(--green); text-decoration: underline; font-size: 12px; }
+  .bubble.bot {
+    background: var(--white);
+    border: 1.5px solid var(--cream-border);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+
+  .bubble.user {
+    background: var(--slate);
+    color: var(--white);
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 10px var(--shadow-md);
+  }
+
+  .bubble strong { font-weight: 700; color: var(--slate); }
+  .bubble.user strong { color: var(--cream); }
+  .bubble a { color: var(--teal); text-decoration: underline; font-size: 12.5px; font-weight: 600; }
 
   .caps-ref {
-    display: inline-block; background: rgba(126,186,72,0.2);
-    border: 1px solid rgba(126,186,72,0.4); color: var(--green);
-    border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600;
+    display: inline-block; background: var(--amber-light);
+    border: 1px solid rgba(232,160,32,0.4); color: var(--amber-dark);
+    border-radius: 5px; padding: 1px 7px; font-size: 11px; font-weight: 700;
   }
 
-  .resource-card {
-    margin-top: 8px; background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
-    padding: 8px 12px;
+  /* Welcome message special styling */
+  .welcome-icon {
+    font-size: 28px; display: block; margin-bottom: 8px;
   }
-  .resource-card .rc-label { font-size: 10px; color: var(--green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  .resource-card a { display: block; font-size: 12px; color: rgba(255,255,255,0.85); margin-top: 3px; word-break: break-all; }
 
-  /* TYPING */
-  .typing-indicator { display: none; gap: 9px; animation: fadeUp 0.3s ease; }
+  /* ── TYPING ── */
+  .typing-indicator { display: none; gap: 10px; animation: fadeUp 0.3s ease; }
   .typing-indicator.visible { display: flex; }
+
   .typing-dots {
-    background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 17px; border-bottom-left-radius: 4px;
-    padding: 13px 16px; display: flex; gap: 5px; align-items: center;
+    background: var(--white); border: 1.5px solid var(--cream-border);
+    border-radius: 16px; border-bottom-left-radius: 4px;
+    padding: 13px 18px; display: flex; gap: 5px; align-items: center;
+    box-shadow: 0 2px 10px var(--shadow);
   }
   .typing-dots span {
-    width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%;
-    animation: bounce 1.2s ease-in-out infinite;
+    width: 7px; height: 7px; background: var(--teal); border-radius: 50%;
+    animation: bounce 1.2s ease-in-out infinite; opacity: 0.5;
   }
   .typing-dots span:nth-child(2){animation-delay:0.2s}
   .typing-dots span:nth-child(3){animation-delay:0.4s}
-  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px);background:var(--green)} }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:0.5} 30%{transform:translateY(-6px);opacity:1} }
 
-  /* SUGGESTIONS */
+  /* ── SUGGESTIONS ── */
   .suggestions {
-    padding: 7px 14px; display: flex; gap: 6px; flex-wrap: wrap;
+    padding: 8px 16px; display: flex; gap: 6px; flex-wrap: wrap;
     flex-shrink: 0; position: relative; z-index: 5;
+    background: var(--cream);
+    border-top: 1px solid var(--cream-border);
   }
-  .sug-btn {
-    padding: 5px 11px; border-radius: 18px; font-size: 11.5px;
-    border: 1px solid rgba(126,186,72,0.35); color: rgba(126,186,72,0.9);
-    background: rgba(126,186,72,0.07); cursor: pointer; transition: all 0.2s;
-    font-family: 'DM Sans', sans-serif;
-  }
-  .sug-btn:hover { background: var(--green); color: #fff; border-color: var(--green); }
 
-  /* INPUT */
+  .sug-btn {
+    padding: 6px 13px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    border: 1.5px solid var(--cream-border); color: var(--text-mid);
+    background: var(--white); cursor: pointer; transition: all 0.2s;
+    font-family: 'Nunito', sans-serif; box-shadow: 0 1px 4px var(--shadow);
+  }
+  .sug-btn:hover { background: var(--teal); color: var(--white); border-color: var(--teal); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(42,140,122,0.2); }
+
+  /* ── INPUT ── */
   .input-area {
-    padding: 11px 14px; background: rgba(0,0,0,0.2);
-    border-top: 1px solid rgba(255,255,255,0.08);
-    display: flex; gap: 9px; align-items: flex-end;
+    padding: 12px 16px; background: var(--white);
+    border-top: 2px solid var(--cream-border);
+    display: flex; gap: 10px; align-items: flex-end;
     flex-shrink: 0; position: relative; z-index: 10;
+    box-shadow: 0 -2px 12px var(--shadow);
   }
+
   .input-wrap {
-    flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 22px; display: flex; align-items: flex-end; padding: 9px 15px;
-    transition: border-color 0.2s;
+    flex: 1; background: var(--cream); border: 1.5px solid var(--cream-border);
+    border-radius: 16px; display: flex; align-items: flex-end; padding: 10px 16px;
+    transition: all 0.2s;
   }
-  .input-wrap:focus-within { border-color: var(--green); background: rgba(255,255,255,0.1); }
+  .input-wrap:focus-within {
+    border-color: var(--teal); background: var(--white);
+    box-shadow: 0 0 0 3px rgba(42,140,122,0.1);
+  }
+
   textarea {
     flex: 1; background: transparent; border: none; outline: none;
-    color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13px;
-    resize: none; max-height: 90px; line-height: 1.5;
+    color: var(--text); font-family: 'Nunito', sans-serif; font-size: 13.5px;
+    resize: none; max-height: 90px; line-height: 1.5; font-weight: 500;
   }
-  textarea::placeholder { color: rgba(255,255,255,0.3); }
+  textarea::placeholder { color: var(--text-light); }
 
   .send-btn {
-    width: 40px; height: 40px; border-radius: 50%; background: var(--green); border: none;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: all 0.2s; box-shadow: 0 4px 12px rgba(126,186,72,0.3);
+    width: 42px; height: 42px; border-radius: 13px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border: none; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(42,140,122,0.35);
   }
-  .send-btn:hover { background: var(--green-dark); transform: scale(1.05); }
-  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  .send-btn svg { fill: #fff; }
+  .send-btn:hover { transform: scale(1.05) translateY(-1px); box-shadow: 0 6px 16px rgba(42,140,122,0.4); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+  .send-btn svg { fill: var(--white); }
 
-  .disclaimer { text-align: center; font-size: 10px; color: rgba(255,255,255,0.2); padding: 3px 14px 7px; flex-shrink: 0; }
+  /* ── DIVIDER ── */
+  .disclaimer {
+    text-align: center; font-size: 10px; color: var(--text-light);
+    padding: 4px 16px 8px; flex-shrink: 0; background: var(--white);
+    font-weight: 500; letter-spacing: 0.2px;
+  }
+
+  /* Formatting in bubbles */
+  .bubble code {
+    background: var(--teal-light); border-radius: 4px;
+    padding: 1px 6px; font-size: 12px; color: var(--teal-dark);
+    font-family: 'Courier New', monospace; font-weight: 600;
+  }
+  .bubble.user code { background: rgba(255,255,255,0.15); color: var(--cream); }
 </style>
 </head>
 <body>
@@ -233,19 +291,22 @@
   <div class="header">
     <div class="bot-avatar">📐</div>
     <div class="header-info">
-      <div class="header-title">Dynamic Tool — Functions Assistant</div>
-      <div class="header-sub">CAPS-Aligned · Gr 10–12 · FET Mathematics</div>
+      <div class="header-title">Dynamic Tool Assistant</div>
+      <div class="header-sub">FET Mathematics · Functions · CAPS Gr 10–12</div>
     </div>
     <div class="grade-pills">
       <div class="grade-pill active" onclick="setGrade(this,'10')">Gr 10</div>
       <div class="grade-pill" onclick="setGrade(this,'11')">Gr 11</div>
       <div class="grade-pill" onclick="setGrade(this,'12')">Gr 12</div>
     </div>
-    <div class="status-dot"></div>
+    <div class="status-wrap">
+      <div class="status-dot"></div>
+      <div class="status-text">Live</div>
+    </div>
   </div>
 
-  <!-- CONCEPT NAVIGATION -->
-  <div class="concept-nav" id="conceptNav">
+  <!-- CONCEPT TABS -->
+  <div class="concept-nav">
     <div class="concept-tab active" onclick="setConcept(this,'overview')">📋 Overview</div>
     <div class="concept-tab" onclick="setConcept(this,'functions')">Functions</div>
     <div class="concept-tab" onclick="setConcept(this,'straight_lines')">Straight Lines</div>
@@ -260,7 +321,8 @@
     <div class="message">
       <div class="msg-avatar bot">📐</div>
       <div class="bubble bot">
-        Welcome to the <strong>Dynamic Tool Functions Assistant</strong>! 👋<br><br>
+        <span class="welcome-icon">👋</span>
+        Welcome to the <strong>Dynamic Tool Assistant</strong>!<br><br>
         I'm your CAPS-aligned teaching companion for <strong>Functions (Gr 10–12)</strong>. I can help you with:<br><br>
         📘 <strong>Content knowledge</strong> — understanding each function type<br>
         🧑‍🏫 <strong>Teaching strategies</strong> — how to explain to learners<br>
@@ -292,7 +354,7 @@
         onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     </div>
     <button class="send-btn" id="sendBtn" onclick="send()">
-      <svg width="17" height="17" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
     </button>
   </div>
 
@@ -300,12 +362,9 @@
 </div>
 
 <script>
-// ── CONTENT MAP from UnpackingofIntervention.xlsx ──
 const CONTENT = {
   functions: {
-    label: "Functions",
-    caps: "CAPS p24",
-    grade: "Gr 10",
+    label: "Functions", caps: "CAPS p24", grade: "Gr 10",
     guiding: ["Relationships between variables", "Table, graphs, words, formulae"],
     videos: [
       { title: "Clarification of Function concept", url: "https://www.youtube.com/watch?v=52tpYl2tTqk&t=195s" },
@@ -316,15 +375,12 @@ const CONTENT = {
       { title: "Siyavula Gr 10 Functions", url: "https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-00" }
     ],
     activities: [
-      { title: "Siyavula Example Activities", url: "https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-00" },
-      { title: "Simple Authentic Example", url: null, note: "See GoogleDoc with sample activities for facilitating concept of functions" }
+      { title: "Siyavula Example Activities", url: "https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-00" }
     ],
     misconceptions: ["Confusing a relation with a function", "Thinking all graphs are functions", "Misreading mapping diagrams"]
   },
   straight_lines: {
-    label: "Straight Lines",
-    caps: "CAPS p24",
-    grade: "Gr 10",
+    label: "Straight Lines", caps: "CAPS p24", grade: "Gr 10",
     guiding: ["Table", "Gradient intercept (m and c)", "x and y intercept", "Graphical solution of simultaneous equations", "Systems of two linear equations (CAPS p22)"],
     videos: [
       { title: "Linear equations", url: "https://www.youtube.com/watch?v=Ft2_QtXAnh8" },
@@ -332,9 +388,7 @@ const CONTENT = {
       { title: "Solving Systems by Graphing", url: "https://www.youtube.com/watch?v=NsoCmMtaRPo" },
       { title: "Systems of Linear Equations by Graphing", url: "https://www.youtube.com/watch?v=SoVUECpWkKc" }
     ],
-    websites: [
-      { title: "Siyavula — Linear Functions Gr 10", url: "https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-01" }
-    ],
+    websites: [{ title: "Siyavula — Linear Functions Gr 10", url: "https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-01" }],
     geogebra: [
       { title: "Straight line (m and c)", url: "https://www.geogebra.org/m/y7UVZHT4#material/qGabgSRT" },
       { title: "Properties of Straight Line Graph", url: "https://www.mathsisfun.com/data/straight_line_graph.html" },
@@ -347,79 +401,28 @@ const CONTENT = {
     misconceptions: ["Confusing gradient with y-intercept", "Sign errors when reading negative gradients", "Misinterpreting the intersection point of simultaneous equations"]
   },
   parabola: {
-    label: "Parabola",
-    caps: "CAPS p24, p30, p32",
-    grade: "Gr 10–12",
-    guiding: [
-      "Table and graphical representation",
-      "Influence of parameters: ax² + q",
-      "Influence of parameters: ax² + bx + c",
-      "Influence of parameters: a(x−p)² + q (completing the square)",
-      "x and y intercept, vertex",
-      "Determining equation from given points",
-      "Average gradient between two points",
-      "Intuitive understanding of gradient at a point",
-      "Nature of the roots (CAPS p30)"
-    ],
+    label: "Parabola", caps: "CAPS p24, p30, p32", grade: "Gr 10–12",
+    guiding: ["Table and graphical representation", "Influence of parameters: ax² + q", "Influence of parameters: ax² + bx + c", "Influence of parameters: a(x−p)² + q (completing the square)", "x and y intercept, vertex", "Determining equation from given points", "Average gradient between two points", "Intuitive understanding of gradient at a point", "Nature of the roots (CAPS p30)"],
     videos: [], websites: [], geogebra: [], activities: [],
-    misconceptions: [
-      "Confusing the vertex with the y-intercept",
-      "Not linking discriminant (b²−4ac) to number of roots",
-      "Errors completing the square when a≠1",
-      "Forgetting that a<0 flips the parabola"
-    ]
+    misconceptions: ["Confusing the vertex with the y-intercept", "Not linking discriminant (b²−4ac) to number of roots", "Errors completing the square when a≠1", "Forgetting that a<0 flips the parabola"]
   },
   hyperbola: {
-    label: "Hyperbola",
-    caps: "CAPS p24, p32",
-    grade: "Gr 10–11",
-    guiding: [
-      "Table and graphical representation",
-      "Influence of parameters: a/x + q",
-      "Influence of parameters: a/(x+p) + q",
-      "Asymptotes (horizontal and vertical)",
-      "Axes of symmetry, x and y intercept"
-    ],
+    label: "Hyperbola", caps: "CAPS p24, p32", grade: "Gr 10–11",
+    guiding: ["Table and graphical representation", "Influence of parameters: a/x + q", "Influence of parameters: a/(x+p) + q", "Asymptotes (horizontal and vertical)", "Axes of symmetry, x and y intercept"],
     videos: [], websites: [], geogebra: [], activities: [],
-    misconceptions: [
-      "Assuming the graph touches the asymptotes",
-      "Confusing horizontal and vertical asymptotes",
-      "Sign errors when reading asymptote from a/(x+p)+q"
-    ]
+    misconceptions: ["Assuming the graph touches the asymptotes", "Confusing horizontal and vertical asymptotes", "Sign errors when reading asymptote from a/(x+p)+q"]
   },
   exponential: {
-    label: "Exponential Functions",
-    caps: "CAPS p24, p32",
-    grade: "Gr 10–12",
-    guiding: [
-      "Table and graphical representation",
-      "Influence of parameters: y = ab^x + q",
-      "Horizontal asymptote",
-      "x and y intercept"
-    ],
+    label: "Exponential Functions", caps: "CAPS p24, p32", grade: "Gr 10–12",
+    guiding: ["Table and graphical representation", "Influence of parameters: y = ab^x + q", "Horizontal asymptote", "x and y intercept"],
     videos: [], websites: [], geogebra: [], activities: [],
-    misconceptions: [
-      "Confusing exponential growth with linear growth",
-      "Thinking b can be negative",
-      "Misreading the horizontal asymptote position when q≠0"
-    ]
+    misconceptions: ["Confusing exponential growth with linear growth", "Thinking b can be negative", "Misreading the horizontal asymptote position when q≠0"]
   },
   trig: {
-    label: "Trigonometric Functions",
-    caps: "CAPS p24, p32, p42",
-    grade: "Gr 10–12",
-    guiding: [
-      "Table and graphical representation",
-      "Influence of parameters on sin, cos, tan",
-      "General solutions of equations (CAPS p42)",
-      "Use graphs to determine general solution to equations"
-    ],
+    label: "Trigonometric Functions", caps: "CAPS p24, p32, p42", grade: "Gr 10–12",
+    guiding: ["Table and graphical representation", "Influence of parameters on sin, cos, tan", "General solutions of equations (CAPS p42)", "Use graphs to determine general solution to equations"],
     videos: [], websites: [], geogebra: [], activities: [],
-    misconceptions: [
-      "Confusing period and amplitude",
-      "Errors applying transformations (horizontal shift vs vertical shift)",
-      "Not restricting domain when solving general solutions"
-    ]
+    misconceptions: ["Confusing period and amplitude", "Errors applying transformations (horizontal shift vs vertical shift)", "Not restricting domain when solving general solutions"]
   }
 };
 
@@ -444,7 +447,7 @@ THE INTERVENTION COVERS THESE CONCEPTS:
    - Guiding text: Relationships between variables; Table, graphs, words, formulae
    - Videos: https://www.youtube.com/watch?v=52tpYl2tTqk&t=195s | https://www.youtube.com/watch?v=aeWeL_4ecBw
    - External resources: https://byjus.com/maths/relations-and-functions/ | https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-00
-   - Sample activities: Siyavula Gr 10 Functions (https://www.siyavula.com/read/za/mathematics/grade-10/functions/06-functions-00) + Simple authentic example via GoogleDoc
+   - Sample activities: Siyavula Gr 10 Functions + Simple authentic example via GoogleDoc
 
 2. STRAIGHT LINES (Concept — Gr 10, CAPS p22, p24)
    - Guiding text: Table; Gradient intercept (m and c); x and y intercept; Systems of two linear equations; Graphical solution of simultaneous equations
@@ -453,7 +456,7 @@ THE INTERVENTION COVERS THESE CONCEPTS:
    - Activities: Siyavula Gr 10 Linear Functions; Khan Academy Systems of equations with graphing
 
 3. PARABOLA (Concept — Gr 10–12, CAPS p24, p30, p32, Framework p68)
-   - Guiding text: Table; Parameters ax²+q, ax²+bx+c, a(x−p)²+q (completing the square); x and y intercept, vertex; Drawing graphs using properties; Determining equation from given points; Average gradient between two points; Intuitive understanding of gradient at a point; Nature of the roots
+   - Guiding text: Table; Parameters ax²+q, ax²+bx+c, a(x−p)²+q; x and y intercept, vertex; Drawing graphs; Determining equation from points; Average gradient; Nature of roots
 
 4. HYPERBOLA (Concept — Gr 10–11, CAPS p24, p32)
    - Guiding text: Table; Parameters a/x+q, a/(x+p)+q; Asymptotes; Axes of symmetry; x and y intercept
@@ -462,37 +465,18 @@ THE INTERVENTION COVERS THESE CONCEPTS:
    - Guiding text: Table; Parameters y=ab^x+q; Horizontal asymptotes; x and y intercept
 
 6. TRIGONOMETRIC FUNCTIONS (Concept — Gr 10–12, CAPS p24, p32, p42)
-   - Guiding text: Table; Parameters for sin, cos, tan; General solutions of equations (use graphs)
+   - Guiding text: Table; Parameters for sin, cos, tan; General solutions of equations
 
-THE MOODLE STRUCTURE teachers navigate:
-- M0: Welcome and Diagnostic
-- Then by Grade (10, 11, 12) → Topic: Functions → Concept (one of the 6 above) → Clarification → ChatBot (that's you!) → Repository (videos, GeoGebra, Siyavula, worksheets)
-- Each clarification has: Guiding text → Videos → External websites → GeoGebra examples → Sample activities/worksheets
-- The intervention uses H5P branching scenarios for interactive content (previously considered Landbot)
+THE MOODLE STRUCTURE: M0 Welcome → Grade (10/11/12) → Topic: Functions → Concept → Clarification → ChatBot → Repository
+The intervention uses H5P branching scenarios for interactive content.
 
 YOUR THREE ROLES:
+1. CONTENT KNOWLEDGE SUPPORT — explain maths clearly, worked examples, CAPS references, match grade level
+2. PEDAGOGICAL SUPPORT — HOW to teach concepts, misconceptions, questioning strategies
+3. RESOURCE NAVIGATION — guide to videos, GeoGebra, Siyavula, what to do next
 
-1. CONTENT KNOWLEDGE SUPPORT
-   - Explain the mathematics clearly and correctly
-   - Provide worked examples using CAPS-appropriate language
-   - Reference the correct CAPS page where relevant
-   - Match depth to the grade (Gr 10, 11, or 12)
-
-2. PEDAGOGICAL SUPPORT  
-   - Explain HOW to teach each concept to Gr 10–12 learners
-   - Surface common misconceptions and how to address them
-   - Suggest questioning strategies and lesson approaches
-   - Recommend the right resource type for the teaching goal
-
-3. RESOURCE NAVIGATION
-   - Guide teachers to specific videos, GeoGebra applets, Siyavula links in the repository
-   - Explain what each resource is for
-   - Help teachers decide what to do next in the Dynamic Tool
-   - If a teacher is stuck, guide them step-by-step through the clarification structure
-
-TONE: Warm, professional, encouraging. Use plain language. Keep responses focused (under 180 words unless a worked example is needed). Always affirm teachers' efforts.
-
-IMPORTANT: Only discuss FET Mathematics Functions content and the Dynamic Tool course. Do not make up CAPS page numbers beyond what is listed above. Be honest when something is not yet filled in the intervention document.`;
+TONE: Warm, professional, encouraging. Plain language. Under 180 words unless worked example needed.
+IMPORTANT: Only discuss FET Mathematics Functions content and the Dynamic Tool course. Be honest when resources are not yet added.`;
 
 let currentGrade = '10';
 let currentConcept = 'overview';
@@ -554,7 +538,7 @@ function formatText(text) {
   return text
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/`(.*?)`/g, '<code style="background:rgba(126,186,72,0.15);border-radius:3px;padding:1px 5px;font-size:12px;color:#7EBA48">$1</code>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
     .replace(/\[CAPS:(.*?)\]/g, '<span class="caps-ref">CAPS: $1</span>')
     .replace(/\n/g, '<br>');
 }
@@ -564,7 +548,7 @@ function buildContext() {
   let ctx = `[Grade: ${currentGrade} | Concept: ${concept ? concept.label : 'Overview — all concepts'}]`;
   if (concept) {
     ctx += `\n[CAPS Reference: ${concept.caps}]`;
-    ctx += `\n[Key guiding text for this concept: ${concept.guiding.join('; ')}]`;
+    ctx += `\n[Key guiding text: ${concept.guiding.join('; ')}]`;
     if (concept.misconceptions.length) ctx += `\n[Common misconceptions: ${concept.misconceptions.join('; ')}]`;
   }
   return ctx;
@@ -590,15 +574,17 @@ async function send() {
   document.getElementById('messages').scrollTop = 99999;
 
   try {
+    const bodyText = await Promise.resolve(JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 1000,
+      system: SYSTEM_PROMPT,
+      messages: history
+    }));
+
     const res = await fetch('https://dynamic-tool-proxy.roxannephd2014.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: history
-      })
+      body: bodyText
     });
 
     const data = await res.json();
